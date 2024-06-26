@@ -1,0 +1,13 @@
+# 忽略所有以 export 開頭的資料夾
+export*/
+
+# 忽略 upload 資料夾
+upload/
+
+# 忽略 img 資料夾
+img/
+
+.vscode/
+
+# 忽略所有 .ipynb 文件
+*.ipynb

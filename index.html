@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>檔案上傳與訓練</title>
+</head>
+<body>
+    <h1>上傳檔案</h1>
+    <form id="upload-form">
+        <input type="file" id="file-input" name="file" multiple>
+        <br>
+        <label for="category-name">分類名稱:</label>
+        <input type="text" id="category-name" name="category-name">
+        <br>
+        <button type="button" onclick="uploadFiles()">上傳檔案</button>
+    </form>
+
+    <div id="uploaded-labels"></div>
+    <div id="image-previews"></div>
+
+    <details>
+        <summary>Advance Setting</summary>
+        <form id="setting-form">
+            <label for="learning_rate">Learning Rate (0.0001 - 1):</label>
+            <input type="number" step="0.0001" id="learning_rate" name="learning_rate" value="0.001" min="0.0001" max="1"><br><br>
+            
+            <label for="batch_size">Batch Size:</label>
+            <input type="number" id="batch_size" name="batch_size" value="2" min="1"><br><br>
+            
+            <label for="epochs">Epochs:</label>
+            <input type="number" id="epochs" name="epochs" value="10" min="1"><br><br>
+            
+            <!-- <label for="steps_per_epoch">Steps Per Epoch (optional):</label>
+            <input type="number" id="steps_per_epoch" name="steps_per_epoch" min="1"><br><br>
+        
+            <input type="checkbox" id="shuffle" name="shuffle">
+            <label for="shuffle">Shuffle:</label><br><br>
+            
+            <input type="checkbox" id="do_fine_tuning" name="do_fine_tuning">
+            <label for="do_fine_tuning">Do Fine Tuning:</label><br><br>
+            
+            <label for="l1_regularizer">L1 Regularizer:</label>
+            <input type="number" step="0.0001" id="l1_regularizer" name="l1_regularizer" value="0.0" min="0"><br><br>
+            
+            <label for="l2_regularizer">L2 Regularizer:</label>
+            <input type="number" step="0.0001" id="l2_regularizer" name="l2_regularizer" value="0.0001" min="0"><br><br>
+            
+            <label for="label_smoothing">Label Smoothing:</label>
+            <input type="number" step="0.01" id="label_smoothing" name="label_smoothing" value="0.1" min="0" max="1"><br><br>
+            
+            <input type="checkbox" id="do_data_augmentation" name="do_data_augmentation" checked>
+            <label for="do_data_augmentation">Do Data Augmentation:</label><br><br>
+            
+            <label for="decay_samples">Decay Samples:</label>
+            <input type="number" id="decay_samples" name="decay_samples" value="2560000" min="1"><br><br>
+            
+            <label for="warmup_epochs">Warmup Epochs:</label>
+            <input type="number" id="warmup_epochs" name="warmup_epochs" value="2" min="0"><br><br> -->
+        </form> 
+    </details>
+
+    <button type="button" onclick="trainModel()">開始訓練</button>
+
+    <div id="response"></div>
+    <div id="training-status">訓練狀態：閒置</div>
+
+    <script>
+        const uploadForm = document.getElementById('upload-form');
+        const responseDiv = document.getElementById('response');
+        const uploadedLabelsDiv = document.getElementById('uploaded-labels');
+        const imagePreviewsDiv = document.getElementById('image-previews');
+
+        document.getElementById('file-input').addEventListener('change', event => {
+            const files = event.target.files;
+            imagePreviewsDiv.innerHTML = ''; // 清空之前的預覽
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100px';
+                    img.style.margin = '5px';
+                    imagePreviewsDiv.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function uploadFiles() {
+            const fileInput = document.getElementById('file-input');
+            const categoryInput = document.getElementById('category-name');
+
+            const files = fileInput.files;
+            const categoryName = categoryInput.value;
+
+            if (files.length === 0) {
+                alert('請選擇至少一個檔案！');
+                return;
+            }
+            if (categoryName === '') {
+                alert('請輸入分類名稱！');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('category_name', categoryName);
+
+            for (const file of files) {
+                formData.append('files', file);
+            }
+
+            try {
+                const response = await fetch('/uploadfiles/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    responseDiv.innerHTML = `<p>檔案上傳成功！</p>`;
+                    updateUploadedLabels();
+                } else {
+                    responseDiv.innerHTML = `<p>檔案上傳失敗，請重試！</p>`;
+                    console.error(response.status, response.statusText);
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<p>網路錯誤，請重試！</p>`;
+                console.error(error);
+            }
+        }
+
+        async function trainModel() {
+            
+            const form = document.getElementById('setting-form');
+            const formData = new FormData(form);
+            const data = {};
+
+            formData.forEach((value, key) => {
+                if (value === 'on') {
+                    data[key] = true;
+                } else if (value === '') {
+                    data[key] = false;
+                } else if (!isNaN(value) && value !== '') {
+                    data[key] = parseFloat(value);
+                } else {
+                    data[key] = value;
+                }
+            });
+          console.log(JSON.stringify(data));
+            try {
+                const response = await fetch('/train/', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    responseDiv.innerHTML = `<p>模型訓練已經開始！</p>`;
+                    console.log(response.json);
+                } else {
+                    responseDiv.innerHTML = `<p>模型訓練啟動失敗，請重試！</p>`;
+                    console.error(response.status, response.statusText);
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<p>網路錯誤，請重試！</p>`;
+                console.error(error);
+            }
+        }
+
+        async function updateUploadedLabels() {
+            try {
+                const response = await fetch('/labels/');
+                if (response.ok) {
+                    const data = await response.json();
+                    const labels = data.labels;
+                    uploadedLabelsDiv.innerHTML = `<h3>已上傳類別: ${labels.join(', ')}</h3>`;
+                } else {
+                    console.error('無法獲取已上傳的類別');
+                }
+            } catch (error) {
+                console.error('網路錯誤:', error);
+            }
+        }
+        // 訓練狀態idle:空閒, training:訓練中, completed:訓練完成, failed:訓練失敗
+        async function checkTrainingStatus() {
+            try {
+                const response = await fetch('/training_status/');
+                if (response.ok) {
+                    const data = await response.json();
+                    const statusDiv = document.getElementById('training-status');
+                    
+                    switch(data.status){
+                        case 'completed':
+                            statusDiv.innerHTML = `訓練狀態：完成，準確率：${data.accuracy}`;
+                            break;
+                        case 'failed':
+                            statusDiv.innerHTML = `訓練狀態：失敗`;
+                            break;
+                        case 'training':
+                            statusDiv.innerHTML = `訓練狀態：訓練中`;
+                            break;
+                        default:
+                            statusDiv.innerHTML = `訓練狀態：空閒`;
+                            break;
+                    }
+                } else {
+                    console.error('無法獲取訓練狀態');
+                }
+                
+            } catch (error) {
+                console.error('網路錯誤:', error);
+            }
+        }
+
+        // 更新已上傳的類別
+        updateUploadedLabels();
+        // 定時更新訓練狀態
+        setInterval(checkTrainingStatus, 2000); 
+    </script>
+</body>
+</html>
