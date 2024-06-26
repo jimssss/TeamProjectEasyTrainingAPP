@@ -8,7 +8,8 @@ upload/
 img/
 
 .vscode/
-__pycache__
+__pycache__/
 .dockerignore
+
 # 忽略所有 .ipynb 文件
 *.ipynb
