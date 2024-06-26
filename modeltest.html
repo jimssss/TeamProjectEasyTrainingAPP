@@ -4,16 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Classifier</title>
-    <link rel="stylesheet" href="modeltest.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #6DD5FA, #FF758C);
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 40px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        #dropArea {
+            border: 3px dashed #ffffff;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 600px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        #dropArea:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+        #dropArea p {
+            text-align: center;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 1;
+        }
+        #classifyButton {
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #classifyButton:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        #imageInput {
+            display: none;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #ffffff;
+            text-align: center;
+            background-color: rgba(0,0,0,0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        #imagePreview {
+            max-width: 100%;
+            max-height: 100%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <h1>Image Classifier</h1>
     <div id="dropArea">
-        <p>Drag and drop an image here or click to select a file</p>
+        <p id="dropAreaText">Drag and drop an image here or click to select a file</p>
         <input type="file" accept="image/*" id="imageInput">
+        <img id="imagePreview" alt="Preview">
     </div>
     <button id="classifyButton">Classify Image</button>
     <p id="result"></p>
-    <script type="module" src="modeltest.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
