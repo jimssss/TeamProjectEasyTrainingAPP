@@ -1,12 +1,7 @@
 export*/
-
 upload/
 img/
-
 .vscode/
-
 __pycache__/
-
 .dockerignore
-
 *.ipynb
