@@ -23,6 +23,71 @@
             color: #ffffff;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
+        .button {
+            padding: 12px 24px;
+            font-size: 18px;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 10px;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        #downloadButton {
+            background-color: #3498db;
+        }
+        #downloadButton:hover {
+            background-color: #2980b9;
+        }
+        #deleteButton {
+            background-color: #e74c3c;
+        }
+        #deleteButton:hover {
+            background-color: #c0392b;
+        }
+
+        #buttonContainer {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        #user-info {
+            background: linear-gradient(45deg, #FF9A8B, #FF6A88, #FF99AC);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        #taskSelect {
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 600px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            text-align-last: center;
+            padding-right: 30px;
+        }
         #dropArea {
             border: 3px dashed #ffffff;
             border-radius: 20px;
@@ -91,12 +156,19 @@
 </head>
 <body>
     <h1>Image Classifier</h1>
+    <div id="user-info"></div>
+    <select id="taskSelect">
+        <option value="">請選擇一個任務</option>
+    </select>
     <div id="dropArea">
         <p id="dropAreaText">Drag and drop an image here or click to select a file</p>
         <input type="file" accept="image/*" id="imageInput">
         <img id="imagePreview" alt="Preview">
     </div>
-    <button id="classifyButton">Classify Image</button>
+    <div id="buttonContainer">
+        <button id="downloadButton" class="button">Download Model</button>
+        <button id="deleteButton" class="button">Delete Model</button>
+    </div>
     <p id="result"></p>
     <script type="module" src="script.js"></script>
 </body>

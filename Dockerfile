@@ -14,12 +14,13 @@ COPY requirements.txt ./
 COPY . ./
 
 # 安裝 Python 套件，並將 pip 的快取目錄掛載為 Docker 的快取
-run pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 RUN yes | pip uninstall opencv-python
 RUN pip install --no-cache-dir opencv-python-headless
 
 # 創建 exported_model_test 目錄並設置適當的權限
 RUN mkdir -p /app/exported_model_test && chown -R root:root /app/exported_model_test
+RUN mkdir -p /app/uploads && chown -R root:root /app/uploads
 
 # 設定 exported_model_test 目錄為VOLUME，以便在容器重新啟動時保存模型
 VOLUME /app/exported_model_test

@@ -1,222 +1,754 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>檔案上傳與訓練</title>
+    <style>
+        .training-section .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .training-section .button-group .btn {
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .training-section .button-group .btn:first-child {
+            margin-left: 0;
+        }
+
+        .training-section .button-group .btn:last-child {
+            margin-right: 0;
+        }
+
+        #TaskName {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #c5c1b9;
+            border-radius: 4px;
+            background-color: #f3efe0;
+            color: #4a4a4a;
+        }
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: #f3efe0;
+            color: #4a4a4a;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .class-card {
+            background-color: #e8e4d9;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin: 10px;
+            width: calc(33% - 20px);
+            min-width: 300px;
+        }
+        .class-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #c5c1b9;
+            padding-bottom: 10px;
+        }
+        .class-title {
+            font-size: 1.2em;
+            font-weight: normal;
+            color: #6b6b6b;
+            cursor: text;
+            padding: 2px 5px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .class-title:hover {
+            background-color: #f0f0f0;
+        }
+        .class-title:focus {
+            outline: none;
+            border-color: #b1a89b;
+            background-color: #f3efe0;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 8px 12px;
+            border: 1px solid #c5c1b9;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            color: #fff;
+        }
+        .btn-secondary {
+            background-color: #9c9183;
+        }
+        .btn-primary {
+            background-color: #b1a89b;
+        }
+        .btn-upload {
+            background-color: #6b6b6b;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .image-preview img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            margin: 5px;
+            border: 1px solid #c5c1b9;
+            border-radius: 10px;
+        }
+        #add-class-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #9c9183;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+        }
+        .training-section {
+            background-color: #e8e4d9;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+            background-color: #c5c1b9;
+            color: #4a4a4a;
+            border: none;
+            outline: none;
+            font-size: 16px;
+        }
+        .collapsible:after {
+            content: '\002B';
+            font-size: 16px;
+            color: #4a4a4a;
+            float: right;
+            margin-left: 5px;
+        }
+        .collapsible.active:after {
+            content: "\2212";
+        }
+        .content {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            background-color: #f3efe0;
+            margin-top: 10px;
+        }
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .form-group label, .form-group input {
+            flex: 1 1 45%;
+            margin-bottom: 10px;
+        }
+        .form-group input {
+            border: 1px solid #c5c1b9;
+            padding: 5px;
+            background-color: #f3efe0;
+            color: #4a4a4a;
+        }
+        h1, h2 {
+            color: #6b6b6b;
+            font-weight: normal;
+        }
+        .webcam-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(243, 239, 224, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        #webcam-view {
+            max-width: 100%;
+            max-height: 80vh;
+            border: 2px solid #c5c1b9;
+        }
+        .webcam-buttons {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .inline-form {
+            display: flex;
+            align-items: center;
+        }
+        .inline-form label {
+            margin-right: 10px; /* 調整標籤和輸入框之間的間距 */
+        }
+        
+        @media (max-width: 600px) {
+            .class-card {
+                width: 100%;
+                margin: 10px 0;
+            }
+            .container {
+                flex-direction: column;
+            }
+            .form-group label, .form-group input {
+                flex: 1 1 100%;
+            }
+            .training-section {
+                max-width: 100%;
+                padding: 15px;
+            }
+            .btn {
+                padding: 10px;
+                font-size: 16px;
+            }
+            .image-preview img {
+                width: 60px;
+                height: 60px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            h2 {
+                font-size: 20px;
+            }
+            .class-title {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            body {
+                padding: 10px;
+            }
+            .class-card {
+                padding: 15px;
+            }
+            .btn {
+                padding: 8px;
+                font-size: 14px;
+            }
+            .image-preview img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <a href="modeltest.html">test model</a>
-    <h1>上傳檔案</h1>
-    <form id="upload-form">
-        <input type="file" id="file-input" name="file" multiple>
-        <br>
-        <label for="category-name">分類名稱:</label>
-        <input type="text" id="category-name" name="category-name">
-        <br>
-        <button type="button" onclick="uploadFiles()">上傳檔案</button>
-    </form>
-
-    <div id="uploaded-labels"></div>
-    <div id="image-previews"></div>
-
-    <details>
-        <summary>Advance Setting</summary>
-        <form id="setting-form">
-            <label for="learning_rate">Learning Rate (0.0001 - 1):</label>
-            <input type="number" step="0.0001" id="learning_rate" name="learning_rate" value="0.001" min="0.0001" max="1"><br><br>
-            
-            <label for="batch_size">Batch Size:</label>
-            <input type="number" id="batch_size" name="batch_size" value="2" min="1"><br><br>
-            
-            <label for="epochs">Epochs:</label>
-            <input type="number" id="epochs" name="epochs" value="10" min="1"><br><br>
-            
-            <!-- <label for="steps_per_epoch">Steps Per Epoch (optional):</label>
-            <input type="number" id="steps_per_epoch" name="steps_per_epoch" min="1"><br><br>
-        
-            <input type="checkbox" id="shuffle" name="shuffle">
-            <label for="shuffle">Shuffle:</label><br><br>
-            
-            <input type="checkbox" id="do_fine_tuning" name="do_fine_tuning">
-            <label for="do_fine_tuning">Do Fine Tuning:</label><br><br>
-            
-            <label for="l1_regularizer">L1 Regularizer:</label>
-            <input type="number" step="0.0001" id="l1_regularizer" name="l1_regularizer" value="0.0" min="0"><br><br>
-            
-            <label for="l2_regularizer">L2 Regularizer:</label>
-            <input type="number" step="0.0001" id="l2_regularizer" name="l2_regularizer" value="0.0001" min="0"><br><br>
-            
-            <label for="label_smoothing">Label Smoothing:</label>
-            <input type="number" step="0.01" id="label_smoothing" name="label_smoothing" value="0.1" min="0" max="1"><br><br>
-            
-            <input type="checkbox" id="do_data_augmentation" name="do_data_augmentation" checked>
-            <label for="do_data_augmentation">Do Data Augmentation:</label><br><br>
-            
-            <label for="decay_samples">Decay Samples:</label>
-            <input type="number" id="decay_samples" name="decay_samples" value="2560000" min="1"><br><br>
-            
-            <label for="warmup_epochs">Warmup Epochs:</label>
-            <input type="number" id="warmup_epochs" name="warmup_epochs" value="2" min="0"><br><br> -->
-        </form> 
-    </details>
-
-    <button type="button" onclick="trainModel()">開始訓練</button>
-
+    <h1>檔案上傳與訓練</h1>
     <div id="response"></div>
-    <div id="training-status">訓練狀態：閒置</div>
+    <div id="user-info">
+        <p>電子郵件: <span id="user-email"></span></p>
+        <h4>已上傳類別:</h4>
+        <ul id="uploaded-categories-list"></ul>
+    </div>
+    <div class="container" id="class-list"></div>
+    
+    <button id="add-class-btn" class="btn btn-primary" onclick="addClass()">+ 新增類別</button>
+    
+    
+    <div class="training-section">
+        <h2>模型訓練參數</h2>
+        <button class="collapsible">設定參數</button>
+        <div class="content">
+            <form id="setting-form" class="form-group">
+                <label for="learning_rate">Learning Rate (0.0001 - 1):</label>
+                <input type="number" step="0.0001" id="learning_rate" name="learning_rate" value="0.001" min="0.0001" max="1">
+                
+                <label for="batch_size">Batch Size:</label>
+                <input type="number" id="batch_size" name="batch_size" value="2" min="1">
+                
+                <label for="epochs">Epochs:</label>
+                <input type="number" id="epochs" name="epochs" value="10" min="1">
+
+                <label for="label_smoothing">label_smoothing:</label>
+                <input type="number" step="0.05" id="label_smoothing" name="label_smoothing" value="0.1" min="0.1" max="1">
+            </form>
+        </div>
+        <div class="inline-form">
+            <label for="TaskName">請輸入訓練任務名稱:</label>
+            <input type="text" id="TaskName">
+        </div>
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="trainModel()">開始訓練模型</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/modeltest/'">模型測試與管理</button>
+        </div>
+        <div id="training-status">訓練狀態：閒置</div>
+    </div>
+
+
+    <div class="webcam-container" id="webcam-container">
+        <video id="webcam-view" autoplay playsinline></video>
+        <div class="webcam-buttons">
+            <button class="btn btn-primary" id="capture-btn" onmousedown="startCapture()" onmouseup="stopCapture()">長按拍照</button>
+            <button class="btn btn-secondary" id="close-webcam-btn">關閉</button>
+        </div>
+    </div>
 
     <script>
-        const uploadForm = document.getElementById('upload-form');
-        const responseDiv = document.getElementById('response');
-        const uploadedLabelsDiv = document.getElementById('uploaded-labels');
-        const imagePreviewsDiv = document.getElementById('image-previews');
+        // for training model and test model
+        const apiURL = "";
+        // for userlogin and userdata
+        const apiURL2 = "https://my-loginapp2-qo754edula-uc.a.run.app";
+        
+        // authToken = localStorage.getItem('access_token');
+        // if(authToken === null) {
+            // window.location.href = 'login.html';
+        const authToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhc2RAYXNkLmNvbSIsImV4cCI6MTcyMDk3MTg5OX0.b7iIlihbwHDBcMj7cXRzY-eUuqrwUofOwKgflRWWq3Y";
+        // }
+        console.log(authToken);
+        let classCount = 0;
+        const classList = document.getElementById('class-list');
+        let userCategories = [];
+        let userEmail = "";
+        
+        // release the training task locker in server
+        async function ResetinServer() {
+            try {
+                const response = await fetch(apiURL + '/reset_system/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                const result = await response.json();
+                return result.labels; 
+            } catch (error) {
+                console.error("Error fetching existing categories:", error);
+                return []; 
+            }
+        }
 
-        document.getElementById('file-input').addEventListener('change', event => {
+        async function getExistingCategories() {
+            try {
+                const response = await fetch(apiURL + '/labels/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                const result = await response.json();
+                return result.labels; 
+            } catch (error) {
+                console.error("Error fetching existing categories:", error);
+                return []; 
+            }
+        }
+
+        async function addClass() {
+            classCount++;
+           
+            const classCard = document.createElement('div');
+            classCard.className = 'class-card';
+            classCard.innerHTML = `
+                <div class="class-header">
+                    <span class="class-title" id="class-name-${classCount}" onclick="editClassName(${classCount})" contenteditable="true">Class ${classCount}</span>
+                    <span class="edit-icon" onclick="editClassName(${classCount})">✎</span>
+                </div>
+                <div>新增圖片:</div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="openWebcam(${classCount})">使用相機</button>
+                    <input type="file" id="file-input-${classCount}" multiple onchange="handleFileInputChange(event, ${classCount})" style="display: none;">
+                    <button class="btn btn-upload" onclick="document.getElementById('file-input-${classCount}').click()">選擇圖片</button>
+                    <button class="btn btn-primary" onclick="uploadFiles(${classCount})">上傳文件</button>
+                </div>
+                <div id="image-previews-${classCount}" class="image-preview"></div>
+            `;
+            classList.appendChild(classCard);
+
+            
+        }
+
+        function editClassName(classId) {
+            const classNameElem = document.getElementById(`class-name-${classId}`);
+            classNameElem.focus();
+        }
+
+        function handleFileInputChange(event, classId) {
             const files = event.target.files;
-            imagePreviewsDiv.innerHTML = ''; // 清空之前的預覽
+            const previewDiv = document.getElementById(`image-previews-${classId}`);
+            previewDiv.innerHTML = '';
             for (const file of files) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    img.style.maxWidth = '100px';
-                    img.style.margin = '5px';
-                    imagePreviewsDiv.appendChild(img);
+                    img.dataset.url = e.target.result; // 將data-url添加到img元素
+                    previewDiv.appendChild(img);
                 };
                 reader.readAsDataURL(file);
             }
-        });
+        }
 
-        async function uploadFiles() {
-            const fileInput = document.getElementById('file-input');
-            const categoryInput = document.getElementById('category-name');
+        let currentClassId;
+        let captureInterval;
+        function openWebcam(classId) {
+            currentClassId = classId;
+            const webcamContainer = document.getElementById('webcam-container');
+            const video = document.getElementById('webcam-view');
+            webcamContainer.style.display = 'flex';
+            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                .then(stream => {
+                    video.srcObject = stream;
+                })
+                .catch(error => {
+                    console.error("Error accessing the webcam", error);
+                });
+        }
 
-            const files = fileInput.files;
-            const categoryName = categoryInput.value;
+        function startCapture() {
+            captureInterval = setInterval(captureImage, 500); // 每0.5秒拍一張
+        }
 
-            if (files.length === 0) {
-                alert('請選擇至少一個檔案！');
+        function stopCapture() {
+            clearInterval(captureInterval);
+        }
+
+        function captureImage() {
+            // const video = document.getElementById('webcam-view');
+            // const canvas = document.createElement('canvas');
+            // canvas.width = video.videoWidth;
+            // canvas.height = video.videoHeight;
+            // canvas.getContext('2d').drawImage(video, 0, 0);
+            // const imageDataUrl = canvas.toDataURL('image/jpeg');
+            
+            // const previewDiv = document.getElementById(`image-previews-${currentClassId}`);
+            // const img = document.createElement('img');
+            // img.src = imageDataUrl;
+            // img.dataset.url = imageDataUrl; // 將data-url添加到img元素
+            // previewDiv.appendChild(img);
+        }
+
+        document.getElementById('close-webcam-btn').addEventListener('click', closeWebcam);
+
+        function closeWebcam() {
+            const webcamContainer = document.getElementById('webcam-container');
+            const video = document.getElementById('webcam-view');
+            webcamContainer.style.display = 'none';
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            stopCapture(); // 確保連拍停止
+        }
+
+        async function trainModel() {
+            const trainingStatus = document.getElementById('training-status');
+            const learningRate = document.getElementById('learning_rate').value;
+            const batchSize = document.getElementById('batch_size').value;
+            const epochs = document.getElementById('epochs').value;
+            const labelSmoothing = document.getElementById('label_smoothing').value;
+            const trainName = document.getElementById('TaskName').value;
+            
+            if( getExistingCategories().length < 2) {
+                alert('至少需要兩個類別才能訓練模型');
                 return;
             }
-            if (categoryName === '') {
-                alert('請輸入分類名稱！');
+
+            trainingStatus.innerHTML = '訓練狀態：訓練中...';
+            console.log('Training model with:',trainName, learningRate, batchSize, epochs);
+            const response = await fetch(apiURL + '/train/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    TaskName: trainName,
+                    training_params: {
+                        learning_rate: parseFloat(learningRate),
+                        batch_size: parseInt(batchSize),
+                        epochs: parseInt(epochs),
+                        label_smoothing: parseFloat(labelSmoothing)
+                    }
+                })
+            });
+
+            const result = await response.json();
+            if (result.message === "Model training started in the background") {
+                checkTrainingStatus();
+            } else {
+                trainingStatus.innerHTML = '訓練狀態：失敗';
+                console.error(result.message);
+            }
+        }
+
+        async function checkTrainingStatus() {
+            const trainingStatus = document.getElementById('training-status');
+            let status = 'training';
+            while (status === 'training') {
+                const response = await fetch(apiURL + '/training_status/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    console.error(result);
+                    status = result.status;
+                    if (status === 'completed') {
+                        trainingStatus.innerHTML = `訓練狀態：完成，準確率：${result.accuracy}`+"<a href='modeltest/'>測試模型</a>";
+                        await ResetinServer();
+                    } else if (status === 'failed') {
+                        trainingStatus.innerHTML = '訓練狀態：失敗';
+                        await ResetinServer();
+                    } else if (status === 'idle') {
+                    trainingStatus.innerHTML = '訓練狀態：空閒';
+                    } else {
+                        trainingStatus.innerHTML = '訓練狀態：訓練中...';
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                } else {
+                    console.error('Failed to check training status');
+                    break;
+                
+                }
+            }
+        }
+
+
+
+        function createOverlay() {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            overlay.style.display = 'flex';
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            overlay.style.zIndex = '1000';
+
+            const message = document.createElement('div');
+            message.style.color = 'white';
+            message.style.fontSize = '24px';
+            message.textContent = '上傳中...請稍候';
+            overlay.appendChild(message);
+
+            document.body.appendChild(overlay);
+            return overlay;
+        }
+
+        // 新增一個函數來檢查上傳狀態
+        async function checkUploadStatus(overlay) {
+            while (true) {
+                const response = await fetch(apiURL + '/uploading_status/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.status !== 'uploading') {
+                        document.body.removeChild(overlay);
+                        return;
+                    }
+                } else {
+                    document.body.removeChild(overlay);
+                    alert('檢查上傳狀態失敗');
+                    return;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 每秒檢查一次
+            }
+        }
+
+
+        async function uploadFiles(classId) {
+            const fileInput = document.getElementById(`file-input-${classId}`);
+            const files = fileInput.files;
+            const category = document.getElementById(`class-name-${classId}`).textContent.trim();
+            const existingCategories = await getExistingCategories();
+
+            if (existingCategories.includes(category)) {
+                alert(`類別名稱 "${category}" 已存在，請修改！`);
                 return;
             }
 
             const formData = new FormData();
-            formData.append('category_name', categoryName);
-
             for (const file of files) {
                 formData.append('files', file);
             }
+            formData.append('category_name', category);
+
+            const overlay = createOverlay();
 
             try {
-                const response = await fetch('/uploadfiles/', {
+                const response = await fetch(apiURL + '/uploadfiles/', {
                     method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    },
                     body: formData
                 });
 
                 if (response.ok) {
-                    responseDiv.innerHTML = `<p>檔案上傳成功！</p>`;
-                    updateUploadedLabels();
-                } else {
-                    responseDiv.innerHTML = `<p>檔案上傳失敗，請重試！</p>`;
-                    console.error(response.status, response.statusText);
-                }
-            } catch (error) {
-                responseDiv.innerHTML = `<p>網路錯誤，請重試！</p>`;
-                console.error(error);
-            }
-        }
-
-        async function trainModel() {
-            
-            const form = document.getElementById('setting-form');
-            const formData = new FormData(form);
-            const data = {};
-
-            formData.forEach((value, key) => {
-                if (value === 'on') {
-                    data[key] = true;
-                } else if (value === '') {
-                    data[key] = false;
-                } else if (!isNaN(value) && value !== '') {
-                    data[key] = parseFloat(value);
-                } else {
-                    data[key] = value;
-                }
-            });
-          console.log(JSON.stringify(data));
-            try {
-                const response = await fetch('/train/', {
-                    method: 'POST',
-                    headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    responseDiv.innerHTML = `<p>模型訓練已經開始！</p>`;
-                    console.log(response.json);
-                } else {
-                    responseDiv.innerHTML = `<p>模型訓練啟動失敗，請重試！</p>`;
-                    console.error(response.status, response.statusText);
-                }
-            } catch (error) {
-                responseDiv.innerHTML = `<p>網路錯誤，請重試！</p>`;
-                console.error(error);
-            }
-        }
-
-        async function updateUploadedLabels() {
-            try {
-                const response = await fetch('/labels/');
-                if (response.ok) {
-                    const data = await response.json();
-                    const labels = data.labels;
-                    uploadedLabelsDiv.innerHTML = `<h3>已上傳類別: ${labels.join(', ')}</h3>`;
-                } else {
-                    console.error('無法獲取已上傳的類別');
-                }
-            } catch (error) {
-                console.error('網路錯誤:', error);
-            }
-        }
-        // 訓練狀態idle:空閒, training:訓練中, completed:訓練完成, failed:訓練失敗
-        async function checkTrainingStatus() {
-            try {
-                const response = await fetch('/training_status/');
-                if (response.ok) {
-                    const data = await response.json();
-                    const statusDiv = document.getElementById('training-status');
+                    await checkUploadStatus(overlay);
+                    console.log(`Files uploaded successfully to category: ${category}`);
+                    document.getElementById(`class-name-${classId}`).closest('.class-card').classList.add('uploaded-class-card');
                     
-                    switch(data.status){
-                        case 'completed':
-                            statusDiv.innerHTML = `訓練狀態：完成，準確率：${data.accuracy}`;
-                            break;
-                        case 'failed':
-                            statusDiv.innerHTML = `訓練狀態：失敗`;
-                            break;
-                        case 'training':
-                            statusDiv.innerHTML = `訓練狀態：訓練中`;
-                            break;
-                        default:
-                            statusDiv.innerHTML = `訓練狀態：空閒`;
-                            break;
+                    if (!userCategories.includes(category)) {
+                        userCategories.push(category);
                     }
+                    
+                    updateUploadedCategories();
                 } else {
-                    console.error('無法獲取訓練狀態');
+                    document.body.removeChild(overlay);
+                    console.error('File upload failed');
+                    alert('檔案上傳失敗');
                 }
-                
             } catch (error) {
-                console.error('網路錯誤:', error);
+                document.body.removeChild(overlay);
+                console.error('Upload error:', error);
+                alert('上傳過程中發生錯誤');
             }
         }
 
-        // 更新已上傳的類別
-        updateUploadedLabels();
-        // 定時更新訓練狀態
-        setInterval(checkTrainingStatus, 2000); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // // 獲取來自 webcam 的圖片並分配唯一名稱
+            // const previewDiv = document.getElementById(`image-previews-${classId}`);
+            // const images = previewDiv.querySelectorAll('img');
+            // let webcamImageIndex = 1; // 初始化編號
+            // for (const img of images) {
+            //     const blob = await fetch(img.dataset.url).then(res => res.blob());
+            //     const webcamImageName = `webcam_${webcamImageIndex}.jpg`; // 使用唯一編號
+            //     formData.append('files', blob, webcamImageName);
+            //     webcamImageIndex++; // 增加編號
+            // }
+
+
+
+
+
+
+
+
+            
+           
+        
+        async function updateEmail() {
+            const userEmailElement = document.getElementById('user-email');
+            try {
+                const response = await fetch(`${apiURL2}/users/me`, {
+                     method: 'GET',
+                     headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user email');
+                 }
+                 const userData = await response.json();
+                userEmail = userData.email; // 更新用戶電子郵件
+                userEmailElement.textContent = userEmail; // 顯示用戶電子郵件
+            } catch (error) {
+                console.error(error);
+               
+            }
+        }
+        async function updateUploadedCategories() {
+            const categoriesList = document.getElementById('uploaded-categories-list');
+            try {
+                const response = await fetch(`${apiURL}/labels/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                    },
+                });
+                 if (!response.ok) {
+                    throw new Error('Failed to fetch uploaded categories');
+                }
+                const data = await response.json();
+                const categories = data.labels;
+
+                categoriesList.innerHTML = categories.map(
+                    (category) => `<li>${category}</li>`).join('');
+            } catch (error) {
+                console.error(error);
+                
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateEmail();
+            updateUploadedCategories();
+
+            const coll = document.getElementsByClassName("collapsible");
+            for (let i = 0; i < coll.length; i++) {
+                coll[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    const content = this.nextElementSibling;
+                    if (content.style.display === "block") {
+                        content.style.display = "none";
+                    } else {
+                        content.style.display = "block";
+                    }
+                });
+            }
+        });
+
+        // Initialize with two classes
+        addClass();
+        addClass();
     </script>
 </body>
 </html>
