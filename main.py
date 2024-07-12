@@ -58,6 +58,10 @@ MODEL_FILE_PATH = "exported_model_test/temp"  # 剛訓練好的模型檔案路�
 USER_MODEL_PATH="exported_model_test/storage" #使用者模型檔案路徑
 UPLOAD_FOLDER = "uploads"
 
+os.makedirs(MODEL_FILE_PATH, exist_ok=True)
+os.makedirs(USER_MODEL_PATH, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 # 將 "static" 目錄掛載為靜態文件路徑
 app.mount("/static", StaticFiles(directory=USER_MODEL_PATH), name="static-files")
 
