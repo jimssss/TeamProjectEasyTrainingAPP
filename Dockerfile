@@ -19,9 +19,9 @@ RUN yes | pip uninstall opencv-python
 RUN pip install --no-cache-dir opencv-python-headless
 
 # 創建 exported_model_test 目錄並設置適當的權限
-RUN mkdir -p /app/exported_model_test && chown -R root:root /app/exported_model_test
-RUN mkdir -p /app/exported_model_test/storage
-RUN mkdir -p /app/uploads && chown -R root:root /app/uploads
+RUN mkdir -p /app/exported_model_test/storage /app/uploads && \
+    chown -R root:root /app/exported_model_test /app/uploads
+
 
 # 設定 exported_model_test 目錄為VOLUME，以便在容器重新啟動時保存模型
 VOLUME /app/exported_model_test
