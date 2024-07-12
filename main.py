@@ -19,9 +19,9 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
 
-from sqlalchemy import Column, String, Float, DateTime, ForeignKey, create_engine, Boolean
-from sqlalchemy.orm import relationship, sessionmaker,Session,declarative_base
-from google.cloud.sql.connector import Connector
+# from sqlalchemy import Column, String, Float, DateTime, ForeignKey, create_engine, Boolean
+# from sqlalchemy.orm import relationship, sessionmaker,Session,declarative_base
+# from google.cloud.sql.connector import Connector
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -276,11 +276,17 @@ async def get_labels(request:Request):
     """get image category labels"""
     user_email=tokenChecker(request)
     if user_email is None:
-        return {"labels": ["token is invalid,please login again"]}
+        return {"error": "token is invalid,please login again"}
     
     user_path = os.path.join(UPLOAD_FOLDER,user_email)
     
     if os.path.exists(user_path):
+        cat_files={}
+        directory = [d for d in os.listdir(user_path) if os.path.isdir(os.path.join(user_path, d))]
+        for d in directory:
+            file_num= len([f for f in os.listdir(os.path.join(user_path, d))])
+            cat_files["d"]=file_num
+
         return {"labels": os.listdir(user_path)}
     else:
         return {"labels": []}
