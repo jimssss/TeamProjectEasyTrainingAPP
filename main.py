@@ -276,7 +276,7 @@ async def get_labels(request:Request):
     """get image category labels"""
     user_email=tokenChecker(request)
     if user_email is None:
-        return {"error": "token is invalid,please login again"}
+        return {"labels":["error","token is invalid,please login again"]}
     
     user_path = os.path.join(UPLOAD_FOLDER,user_email)
     
@@ -285,11 +285,12 @@ async def get_labels(request:Request):
         directory = [d for d in os.listdir(user_path) if os.path.isdir(os.path.join(user_path, d))]
         for d in directory:
             file_num= len([f for f in os.listdir(os.path.join(user_path, d))])
-            cat_files["d"]=file_num
+            cat_files[d]=file_num
 
-        return {"labels": os.listdir(user_path)}
+        return {"labels": os.listdir(user_path),**cat_files}
     else:
         return {"labels": []}
+
 
 @app.post("/train/")
 async def train_model(background_tasks: BackgroundTasks,request:Request,TaskName:str=Body(...), training_params: TrainingParams=Body(...)):
