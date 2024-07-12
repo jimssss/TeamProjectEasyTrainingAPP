@@ -23,7 +23,7 @@ RUN mkdir -p /app/exported_model_test/storage /app/uploads && \
     chown -R root:root /app/exported_model_test /app/uploads
 
 
-# 設定 exported_model_test 目錄為VOLUME，以便在容器重新啟動時保存模型
+# 設定 exported_model_test 目錄為VOLUME以便在容器重新啟動時保存模型
 VOLUME /app/exported_model_test
 VOLUME /app/uploads
 
