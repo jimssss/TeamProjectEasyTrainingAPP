@@ -438,11 +438,11 @@ async def download_model(request: Request, taskName: str):
     if not matching_models:
         raise HTTPException(status_code=404, detail=f"No model found for task: {taskName}")
     
-    # 選擇最新的模型（如果有多個）
+    # select newest model
     latest_model = max(matching_models)
     model_path = os.path.join(user_model_dir, latest_model)
     
-    # 生成相對於靜態文件目錄的路徑
+    # 生成相對於靜態文件目錄的相對路徑
     relative_path = os.path.relpath(model_path, start="exported_model_test/storage")
     
     # 構建完整的URL
