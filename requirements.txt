@@ -2,7 +2,6 @@ absl-py==1.4.0
 aiofiles==23.2.1
 annotated-types==0.7.0
 anyio==4.4.0
-array_record==0.5.1
 asttokens==2.4.1
 astunparse==1.6.3
 attrs==23.2.0

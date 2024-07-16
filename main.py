@@ -18,6 +18,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.responses import Response
+
 
 # from sqlalchemy import Column, String, Float, DateTime, ForeignKey, create_engine, Boolean
 # from sqlalchemy.orm import relationship, sessionmaker,Session,declarative_base
@@ -52,6 +55,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+class HTTPSRedirectMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        if request.headers.get("X-Forwarded-Proto", "http") == "https":
+            request.scope["scheme"] = "https"
+        response = await call_next(request)
+        return response
+
+app.add_middleware(HTTPSRedirectMiddleware)
 
 
 MODEL_FILE_PATH = "exported_model_test/temp"  # 剛訓練好的模型檔案路徑
@@ -434,7 +447,8 @@ async def download_model(request: Request, taskName: str):
     
     # 構建完整的URL
     model_url = request.url_for("static-files", path=relative_path)
-    
+    # if "http://" in model_url:
+    #     model_url=model_url.replace("http://", "https://")
     return JSONResponse({
         "task_name": taskName,
         "model_file_url": str(model_url),

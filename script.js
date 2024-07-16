@@ -20,7 +20,7 @@ let useremail="";
 // if (!token) {
 //     window.location.href = 'login.html';
 // }
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhc2RAYXNkLmNvbSIsImV4cCI6MTcyMDk3MTg5OX0.b7iIlihbwHDBcMj7cXRzY-eUuqrwUofOwKgflRWWq3Y";
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhc2RAYXNkLmNvbSIsImV4cCI6MTcyMTM2MjQ1MH0.ZD-m4nMoVSVZXFQq9-tPdnZbhOXZnNgd-al9jYjus_A";
 
 
 async function getuser() {
@@ -65,15 +65,14 @@ async function downloadModel() {
               'Authorization': `Bearer ${token}`
           }
       });
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const model_data = await response.json();
+      const url = model_data.model_file_url;
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `${taskName}_model.pth`;
+      a.download = model_data.model_file_name;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
   } catch (error) {
       console.error('Error downloading model:', error);
       alert('Error downloading model');
@@ -266,6 +265,9 @@ function previewFile(file) {
         imagePreview.src = reader.result;
         imagePreview.style.display = 'block';
         dropAreaText.style.display = 'none';  // 隐藏文本
+    }
+    imagePreview.onload = function() {
+        // 確保圖像已設置並加載完成後調用 classifyImage 函數
         classifyImage(imagePreview);
     }
 }
