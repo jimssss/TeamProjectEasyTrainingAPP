@@ -92,70 +92,6 @@ DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
 DB_NAME = "userdata"
 
-
-#uncomment the following code to use database
-# # initialize the connector object
-# connector = Connector()
-
-# # define a function that returns a database connection object
-# def getconn():
-#     conn = connector.connect(
-#         INSTANCE_CONNECTION_NAME,
-#         "pymysql",
-#         user=DB_USER,
-#         password=DB_PASS,
-#         db=DB_NAME
-#     )
-#     return conn
-
-# # create a connection pool
-# pool = create_engine(
-#     "mysql+pymysql://",
-#     creator=getconn,
-# )
-
-# # create a database model
-# Base = declarative_base()
-
-# class User_Db(Base):
-#     __tablename__ = "users"
-#     email = Column(String(255), primary_key=True, unique=True, index=True, nullable=False)
-#     hashed_password = Column(String(255), nullable=False)
-#     line_name =Column(String(255),nullable=True)
-
-# # class Task(Base):
-# #     __tablename__ = "tasks"
-# #     id = Column(String(36), primary_key=True, index=True)
-# #     name = Column(String(36), index=True)
-# #     user_id = Column(String(36), ForeignKey('users2.id'))
-# #     file_path = Column(String(100))
-# #     accuracy = Column(Float)
-# #     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-# #     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
-
-# #     owner = relationship("User", back_populates="tasks")
-
-# # create the database table
-# Base.metadata.create_all(bind=pool)
-
-# # create a session local to perform database operations
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=pool)
-
-# # search user data
-# def search_user_data(email) -> dict | None:
-#     session = SessionLocal()
-#     try:
-#         queried_user = session.query(User_Db).filter(User_Db.email == email).first()
-#         if queried_user:
-#             return {
-#                 "email": queried_user.email,
-#                 "hashed_password": queried_user.hashed_password,
-#                 "line_name": queried_user.line_name
-#             }
-#         return None
-#     finally:
-#         session.close()
-
 @app.get("/")
 async def main():
     return FileResponse('index.html')
@@ -269,7 +205,8 @@ def process_bearer_token(authorization: str) -> str:
 async def upload_files(request:Request, files: List[UploadFile] = File(...), category_name: str = Body(...)):
     global UPLOADING_STATUS
     user_email=tokenChecker(request)
-    
+    if user_email is None:
+        raise HTTPException(status_code=422, detail="token is invalid,please login again")
     if category_name is None:
         raise HTTPException(status_code=422, detail="Category name cannot be empty")
     
@@ -317,9 +254,11 @@ async def train_model(background_tasks: BackgroundTasks,request:Request,TaskName
     labels = await get_labels(request)
     if labels.get("labels") == []:
         return {"message": "No images uploaded for training."}
+    elif len(labels.get("labels"))<2:
+        return {"message": "More than two categories are necessary."}
     
     user_email=tokenChecker(request)
-    print(user_email)
+    
     usertask=await get_user_tasks(request)
     if TaskName in usertask["user_tasks"]:
         return {"message": "Task name already exists. Please choose a different name."}
@@ -396,6 +335,8 @@ async def reset_system(request: Request):
 
     global TRAINING_STATUS
     user_email = tokenChecker(request)
+    if user_email is None:
+        raise HTTPException(status_code=422, detail="token is invalid,please login again")
     
     await reset_system_internal(user_email)
     return {"message": "System has been reset and is ready for new training."}
@@ -412,6 +353,10 @@ async def get_training_status():
 async def get_uploading_status(request:Request):
     global UPLOADING_STATUS
     user_email=tokenChecker(request)
+    
+    if user_email is None:
+        raise HTTPException(status_code=422, detail="token is invalid,please login again")
+    
     if user_email not in UPLOADING_STATUS["current_users"]:
         return {"status": "stopped"}
     return {"status": "uploading"}
@@ -419,6 +364,8 @@ async def get_uploading_status(request:Request):
 @app.get("/users/me")
 async def read_users_me(request: Request)->str:
     user_email = tokenChecker(request)
+    if user_email is None:
+        raise HTTPException(status_code=422, detail="token is invalid,please login again")
     return user_email
     
 
@@ -427,6 +374,9 @@ async def read_users_me(request: Request)->str:
 @app.get("/download_model/{taskName}")
 async def download_model(request: Request, taskName: str):
     user_email = tokenChecker(request)
+    if user_email is None:
+        raise HTTPException(status_code=422, detail="token is invalid,please login again")
+    
     user_model_dir = os.path.join(USER_MODEL_PATH, user_email)
     
     if not os.path.exists(user_model_dir):
@@ -459,6 +409,8 @@ async def download_model(request: Request, taskName: str):
 @app.delete("/delete_model/{taskName}")
 async def delete_model(request: Request, taskName: str):
     user_email = tokenChecker(request)
+    if user_email is None:
+        raise HTTPException(status_code=422, detail="token is invalid,please login again")
     user_model_dir = os.path.join(USER_MODEL_PATH, user_email)
     
     if not os.path.exists(user_model_dir):
@@ -479,6 +431,8 @@ async def delete_model(request: Request, taskName: str):
 @app.get("/user_tasks/")
 async def get_user_tasks(request: Request):
     user_email = tokenChecker(request)
+    if user_email is None:
+        raise HTTPException(status_code=422, detail="token is invalid,please login again")
     user_model_dir = os.path.join(USER_MODEL_PATH, user_email)
     
     if not os.path.exists(user_model_dir):
