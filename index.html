@@ -330,12 +330,12 @@
         // for training model and test model
         const apiURL = "";
         // for userlogin and userdata
-        const apiURL2 = "https://my-loginapp-qo754edula-de.a.run.app/";
+        const apiURL2 = "https://my-loginapp-qo754edula-de.a.run.app";
         
         // const authToken = localStorage.getItem('access_token');
         // if(authToken === null) {
-        //     window.location.href = 'https://my-loginapp2-qo754edula-uc.a.run.app/';
-        const authToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJxd2VAcXdlLmNvbSIsImV4cCI6MTcyMTg3Mjc1N30.S8cWv1P-3jcA0e2vhm70Yqv4i2x-ceO1VEuojWWAJN8";
+        //     window.location.href = 'https://storage.googleapis.com/jim_team_client0702/login/login.html';
+        const authToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJxd2VAcXdlLmNvbSIsImV4cCI6MTcyMTk3MTIzNH0.83GEcsbehdxKqHr7NHVLARkWus8AxAajnted-Y0pWJE";
         // }
         console.log(authToken);
         let classCount = 0;
@@ -528,7 +528,7 @@
                     console.error(result);
                     status = result.status;
                     if (status === 'completed') {
-                        trainingStatus.innerHTML = `訓練狀態：完成，準確率：${result.accuracy}`+"<a href='modeltest/'>測試模型</a>";
+                        trainingStatus.innerHTML = `訓練狀態：完成，準確率：${result.accuracy}`+"<a href='/modeltest/'>測試模型</a>";
                         await ResetinServer();
                     } else if (status === 'failed') {
                         trainingStatus.innerHTML = '訓練狀態：失敗';

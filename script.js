@@ -1,4 +1,3 @@
-import { ImageClassifier, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2";
 
 const dropArea = document.getElementById('dropArea');
 const dropAreaText = document.getElementById('dropAreaText');
@@ -11,16 +10,17 @@ const downloadButton = document.getElementById('downloadButton');
 const deleteButton = document.getElementById('deleteButton');
 
 const APIURL ="";
-const APIURL2 = 'https://my-loginapp2-qo754edula-uc.a.run.app';
+const APIURL2 = 'https://my-loginapp-qo754edula-de.a.run.app';
 const taskSelect = document.getElementById('taskSelect');
-let imageClassifier;
+let tfliteModel;
+let ModelLabel;
 let useremail="";
 // set path from user-info api
-// const token= localStorage.getItem("token");
+// const token= localStorage.getItem("access_token");
 // if (!token) {
-//     window.location.href = 'login.html';
+//     window.location.href = 'https://my-loginapp-qo754edula-de.a.run.app';
 // }
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhc2RAYXNkLmNvbSIsImV4cCI6MTcyMTM2MjQ1MH0.ZD-m4nMoVSVZXFQq9-tPdnZbhOXZnNgd-al9jYjus_A";
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJxd2VAcXdlLmNvbSIsImV4cCI6MTcyMTk3MTIzNH0.83GEcsbehdxKqHr7NHVLARkWus8AxAajnted-Y0pWJE";
 
 
 async function getuser() {
@@ -141,14 +141,8 @@ function populateTaskSelect(tasks) {
   });
 }
 
-
-
-
-
-// useremail="qwe@qwe.com";
-
-// 修改：根據選擇的任務創建圖像分類器
-async function createImageClassifier(taskName) {
+// load TensorFlow Lite model for the selected task
+async function loadTFLiteModel(taskName) {
     try {
       const response = await fetch(`${APIURL}/download_model/${taskName}`, {
         method: 'GET',
@@ -160,51 +154,31 @@ async function createImageClassifier(taskName) {
         throw new Error('無法獲取模型信息');
       }
       const modelInfo = await response.json();
+      // loading the TensorFlow Lite model for url
+      tfliteModel = await tflite.loadTFLiteModel(modelInfo.model_file_url);
+      // ladoing the labels for the model
+      ModelLabel = modelInfo.model_label;
       
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm"
-      );
-      imageClassifier = await ImageClassifier.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: modelInfo.model_file_url
-        },
-        maxResults: 1,
-        runningMode: 'IMAGE'
-      });
       
       console.log(`已加載任務 ${taskName} 的模型`);
     } catch (error) {
-      console.error('創建圖像分類器失敗:', error);
+      console.error('Error loading model', error);
     }
   }
   
-  // 修改：當任務選擇改變時更新分類器
+  // update the tfliteModel with the selected task
   taskSelect.addEventListener('change', (event) => {
     const selectedTask = event.target.value;
     if (selectedTask) {
-      createImageClassifier(selectedTask);
+      loadTFLiteModel(selectedTask);
     }
   });
+
   downloadButton.addEventListener('click', downloadModel);
   deleteButton.addEventListener('click', deleteModel);
 
-  getuser();
-  loadUserTasks();
-
-
-
-// const createImageClassifier = async () => {
-//   const vision = await FilesetResolver.forVisionTasks(
-//     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm"
-//   );  
-//   imageClassifier = await ImageClassifier.createFromOptions(vision, {
-//     baseOptions: {
-//       modelAssetPath: `exported_model_test/${useremail}/model.tflite`
-//     },
-//     maxResults: 1,
-//     runningMode: 'IMAGE'
-//   });
-// };
+  
+ 
 
 
 
@@ -273,15 +247,102 @@ function previewFile(file) {
 }
 
 async function classifyImage(image) {
-  if (!imageClassifier) {
+   if (!tfliteModel) {
+    throw new Error("Model not loaded");
+  }
+  // show start stage
+  result.innerText = "Classifying...";
+  let tensor;
+  try {
+    // preprocess the image scale=1./127.5 offset=-1 ,-1~1
+    const tensor = tf.tidy(() => {
+      const imageTensor = tf.browser.fromPixels(image);
+      const resized = tf.image.resizeNearestNeighbor(imageTensor, [224, 224]);
+      const offset = tf.scalar(127.5);
+      const normalizedImageData = resized.sub(offset).div(offset);
+      return normalizedImageData.cast('float32').expandDims(0);
+    });
+
+    const predictions = await tfliteModel.predict(tensor);
+    // get probabilities
+    const probabilities = await predictions.data();
+    console.log(probabilities)
+    
+    // get the classification results
+    console.log(ModelLabel)
+    const results = ModelLabel.map((label, index) => ({
+      label,
+      probability: probabilities[index]
+    }));
+
+    // sort by probability
+    results.sort((a, b) => b.probability - a.probability);
+
+    // use requestAnimationFrame to update the UI
+    requestAnimationFrame(() => {
+      // create the result string
+      // const resultString = results.map(item => 
+      //   `${item.label}: ${(item.probability * 100).toFixed(2)}%`
+      // ).join('\n');
+      const topResult = results[0]; // get the top result
+      const resultString = `${topResult.label}: ${(topResult.probability * 100).toFixed(2)}%`;
+      result.innerText = `Classification Result:\n${resultString}`;
+    });
+    await getGradCAM(image);
+    return results; // return the results for further processing
+
+  } catch (error) {
+    console.error('Classification error:', error);
+    result.innerText = "An error occurred during classification.";
+  } finally {
+    // 確保釋放 tensor 的內存
+    if (tensor) tensor.dispose();
+  }
+}
+
+async function getGradCAM(image) {
+  const taskName = taskSelect.value;
+  if (!taskName) {
+    console.error('No task selected');
     return;
   }
-  const classificationResult = await imageClassifier.classify(image);
-  const classifications = classificationResult.classifications;
-  result.innerText =
-    "Classification: " +
-    classifications[0].categories[0].categoryName +
-    "\nConfidence: " +
-    Math.round(parseFloat(classifications[0].categories[0].score) * 100) +
-    "%";
+
+  // Convert base64 to blob
+  const base64Response = await fetch(image.src);
+  const blob = await base64Response.blob();
+
+  // Create a File object
+  const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch(`${APIURL}/predict/${taskName}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Grad-CAM image: ${response.status} ${response.statusText}`);
+    }
+
+    const gradcamBlob = await response.blob();
+    const gradcamUrl = URL.createObjectURL(gradcamBlob);
+    
+    const gradcamImage = document.getElementById('gradcamImage');
+    gradcamImage.src = gradcamUrl;
+    gradcamImage.style.display = 'block';
+  } catch (error) {
+    console.error('Error fetching Grad-CAM:', error);
+  }
 }
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await getuser();
+  await loadUserTasks();
+});

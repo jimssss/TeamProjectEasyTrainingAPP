@@ -152,6 +152,17 @@
             transform: translate(-50%, -50%);
             display: none;
         }
+        #gradcamResult {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #gradcamImage {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -170,6 +181,18 @@
         <button id="deleteButton" class="button">Delete Model</button>
     </div>
     <p id="result"></p>
+    <div id="gradcamResult">
+        <h3>Grad-CAM Visualization</h3>
+        <img id="gradcamImage" alt="Grad-CAM Result">
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <!--
+    Import @tensorflow/tfjs-tflite
+
+    Note that we need to explicitly load dist/tf-tflite.min.js so that it can
+    locate WASM module files from their default location (dist/).
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite/dist/tf-tflite.min.js"></script>
     <script type="module" src="script.js"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@ absl-py==1.4.0
 aiofiles==23.2.1
 annotated-types==0.7.0
 anyio==4.4.0
+array_record==0.5.1
 asttokens==2.4.1
 astunparse==1.6.3
 attrs==23.2.0
@@ -54,10 +55,7 @@ ipython==8.26.0
 jax==0.4.30
 jaxlib==0.4.30
 jedi==0.19.1
-Jinja2==3.1.4
 joblib==1.4.2
-jupyter_client==8.6.2
-jupyter_core==5.7.2
 kaggle==1.6.14
 keras==2.15.0
 kiwisolver==1.4.5
@@ -69,8 +67,6 @@ MarkupSafe==2.1.5
 matplotlib==3.9.0
 matplotlib-inline==0.1.7
 mdurl==0.1.2
-mediapipe==0.10.14
-mediapipe-model-maker==0.2.1.4
 ml-dtypes==0.2.0
 namex==0.0.8
 nest-asyncio==1.6.0
@@ -83,7 +79,6 @@ opt-einsum==3.3.0
 optree==0.11.0
 orjson==3.10.5
 packaging==24.1
-pandas==2.2.2
 parso==0.8.4
 pexpect==4.9.0
 pillow==10.3.0
@@ -169,3 +164,4 @@ websockets==12.0
 Werkzeug==3.0.3
 wrapt==1.14.1
 zipp==3.19.2
+google-cloud-storage

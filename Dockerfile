@@ -15,17 +15,16 @@ COPY . ./
 
 # 安裝 Python 套件，並將 pip 的快取目錄掛載為 Docker 的快取
 RUN pip install --no-cache-dir -r requirements.txt
-RUN yes | pip uninstall opencv-python
+# RUN yes | pip uninstall opencv-python
 RUN pip install --no-cache-dir opencv-python-headless
 
 # 創建 exported_model_test 目錄並設置適當的權限
-RUN mkdir -p /app/exported_model_test/storage /app/uploads && \
-    chown -R root:root /app/exported_model_test /app/uploads
+RUN mkdir -p /app/exported_model_test/storage /app/uploads /app/exported_heatmap && \
+    chown -R root:root /app/exported_model_test /app/uploads /app/exported_heatmap
 
 
 # 設定 exported_model_test 目錄為VOLUME以便在容器重新啟動時保存模型
-VOLUME /app/exported_model_test
-VOLUME /app/uploads
+VOLUME ["/app/exported_model_test", "/app/uploads", "/app/exported_heatmap"]
 
 EXPOSE 8000
 # 當 Docker 容器啟動時，執行 Uvicorn 伺服器

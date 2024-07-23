@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload and Display Image</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 80vw; /* 限制容器最大宽度 */
+        }
+
+        #resultContainer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #resultImage {
+            max-width: 100%;
+            max-height: 80vh; /* 限制图片最大高度 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload an Image</h1>
+        <input type="file" id="fileInput" />
+        <button onclick="uploadImage()">Upload</button>
+        <div id="resultContainer">
+            <h2>Result:</h2>
+            <img id="resultImage" src="" alt="Result Image" style="display:none;"/>
+        </div>
+    </div>
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            const resultImage = document.getElementById('resultImage');
+            const resultContainer = document.getElementById('resultContainer');
+
+            if (fileInput.files.length === 0) {
+                alert('Please select a file first.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhc2RAYXNkLmNvbSIsImV4cCI6MTcyMTg3OTI1NX0.jTWbytSHQBhgILfTRU6pCC5cV4v05KRtULqFJ2YJQZQ';  // 替换为你的 Bearer Token
+
+            try {
+                const response = await fetch(`/predict/ogashi`, { 
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+
+                resultImage.src = url;
+                resultImage.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
